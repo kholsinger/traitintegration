@@ -5,7 +5,7 @@
 #' assessing phenotypic integration using a brmsfit object from a
 #' multiresponse model.
 #'
-#' #' @param fit A brmsfit object from a multiresponse model
+#' @param fit A brmsfit object from a multiresponse model
 #'
 #' This function encapsulates all of the computations associated with
 #' assessing phenotypic integration using a brmsfit object from a
