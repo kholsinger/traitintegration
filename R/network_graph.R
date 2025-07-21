@@ -8,8 +8,8 @@
 #' @param name The name of a ColorBrewer palette. This should be a diverging
 #' palette. Default: RdYlBu
 #'
-#' @return A list with named components `color` and `label`. `label` is the
-#' correlation coefficient
+#' @return A data frame with columns `color` and `label`. `label` is the
+#' correlation coefficient.
 apply_colors <- function(R, name = "RdYlBu") {
   ## get database of information about ColorBrewer palettes
   ##
@@ -41,7 +41,7 @@ apply_colors <- function(R, name = "RdYlBu") {
       r_vector <- c(r_vector, R[i, j])
     }
   }
-  return(list(color = color_vector, label = r_vector))
+  return(data.frame(color = color_vector, label = r_vector))
 }
 
 #' Visualize a the posterior distribution of a correlation matrix from
