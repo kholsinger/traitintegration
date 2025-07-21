@@ -12,8 +12,12 @@ RoxygenNote: 7.3.2
 Imports: 
     brms,
     dplyr,
+    ggplot2,
+    ggraph,
+    igraph,
     magrittr,
-    matrixcalc
+    matrixcalc,
+    RColorBrewer
 Depends: 
     R (>= 3.5)
 LazyData: true
