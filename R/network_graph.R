@@ -63,7 +63,7 @@ apply_colors <- function(R, name = "RdYlBu") {
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
-                                       style = "arc")
+                                       style = "arc", palette = "RdYlBu")
 {
   Omega <- get_Omega(output_model)
   model_df <- as.data.frame(output_model)
@@ -105,7 +105,7 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
                                                mode = "undirected",
                                                diag = FALSE)
 
-  igraph::E(graph)$Correlation <- apply_colors(R)$color
+  igraph::E(graph)$Correlation <- apply_colors(R, palette)$color
   igraph::E(graph)$P_value <- weight_vector
 
   if (style == "arc") {
