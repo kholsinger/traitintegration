@@ -41,7 +41,9 @@ apply_colors <- function(R, name = "RdYlBu") {
       r_vector <- c(r_vector, R[i, j])
     }
   }
-  return(data.frame(color = color_vector, label = r_vector))
+  dat <- data.frame(color = color_vector,
+                    label = r_vector)
+  return(dat)
 }
 
 #' Visualize a the posterior distribution of a correlation matrix from
@@ -55,11 +57,14 @@ apply_colors <- function(R, name = "RdYlBu") {
 #' @param output_model An object of class `brmsfit`
 #' @param labels Labels for the nodes. If `NULL` then the names used in the
 #' `brms` model are also used here
+#' @param style Style of visualization, "arc" (default) or "line"
 #'
 #' @return A gggraph object that can be further modified
 #'
 #' @export
-plot_posterior_correlation <- function(output_model, labels = NULL) {
+plot_posterior_correlation <- function(output_model, labels = NULL,
+                                       style = "arc")
+{
   Omega <- get_Omega(output_model)
   model_df <- as.data.frame(output_model)
   tmp <- model_df %>%
@@ -103,18 +108,25 @@ plot_posterior_correlation <- function(output_model, labels = NULL) {
   igraph::E(graph)$Correlation <- apply_colors(R)$color
   igraph::E(graph)$P_value <- weight_vector
 
-  Cor_label <- round(apply_colors(R)$label, 3)
-  Cor_value <- apply_colors(R)$color
-
-  p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
-    ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
-                                       edge_color = Correlation)) +
-    ggraph::scale_edge_color_manual(labels = Cor_label,
-                                    values = Cor_value) +
-    ggraph::geom_node_point(size = 5) +
-    ggraph::geom_node_label(ggplot2::aes(label = name),
-                            size = 5) +
-    ggraph::theme_graph()
+  if (style == "arc") {
+    p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
+      ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
+                                         edge_color = Correlation)) +
+      ggraph::geom_node_point(size = 5) +
+      ggraph::geom_node_label(ggplot2::aes(label = name),
+                              size = 5) +
+      ggraph::theme_graph()
+  } else if (style == "line") {
+    p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
+      ggraph::geom_edge_link(ggplot2::aes(edge_width = P_value,
+                                          edge_color = Correlation)) +
+      ggraph::geom_node_point(size = 5) +
+      ggraph::geom_node_label(ggplot2::aes(label = name),
+                              size = 5) +
+      ggraph::theme_graph()
+  } else {
+    stop(style, " is not a recognized style!")
+  }
   return(p)
 }
 
