@@ -59,7 +59,11 @@ apply_colors <- function(R, name = "RdYlBu") {
 #' `brms` model are also used here
 #' @param style Style of visualization, "arc" (default) or "line"
 #'
-#' @return A gggraph object that can be further modified
+#' @return A list with two elements
+#'
+#' `p` A gggraph object that can be further modified
+#'
+#' `R` The posterior mean correlation matrixtmp
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
@@ -127,6 +131,7 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
   } else {
     stop(style, " is not a recognized style!")
   }
-  return(p)
+  print(p)
+  return(list(p = p, R = R))
 }
 
