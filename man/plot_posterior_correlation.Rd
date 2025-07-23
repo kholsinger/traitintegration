@@ -9,7 +9,7 @@ plot_posterior_correlation(
   output_model,
   labels = NULL,
   style = "arc",
-  palette = "RdYlBu"
+  palette = "RdBu"
 )
 }
 \arguments{
@@ -19,6 +19,9 @@ plot_posterior_correlation(
 \code{brms} model are also used here}
 
 \item{style}{Style of visualization, "arc" (default) or "line"}
+
+\item{palette}{RColorBrewer palette to use. See \code{apply_colors()} for
+details. Default: "RdBu"}
 }
 \value{
 A list with two elements

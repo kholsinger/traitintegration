@@ -61,6 +61,8 @@ apply_colors <- function(R, name = "RdBu") {
 #' @param labels Labels for the nodes. If `NULL` then the names used in the
 #' `brms` model are also used here
 #' @param style Style of visualization, "arc" (default) or "line"
+#' @param palette RColorBrewer palette to use. See `apply_colors()` for
+#' details. Default: "RdBu"
 #'
 #' @return A list with two elements
 #'
@@ -70,7 +72,7 @@ apply_colors <- function(R, name = "RdBu") {
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
-                                       style = "arc", palette = "RdYlBu")
+                                       style = "arc", palette = "RdBu")
 {
   Omega <- get_Omega(output_model)
   model_df <- as.data.frame(output_model)
