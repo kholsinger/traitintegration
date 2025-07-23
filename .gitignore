@@ -10,4 +10,5 @@
 ## Emacs backup files
 ##
 *~
-.#*
+.*#
+*#

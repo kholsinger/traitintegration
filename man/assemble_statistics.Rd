@@ -6,19 +6,15 @@
 \usage{
 assemble_statistics(fit)
 }
+\arguments{
+\item{fit}{A brmsfit object from a multiresponse model}
+}
 \value{
 A data frame with the eigenvalues, lead eigenvalue, variance
 of eigenvalues, and ent_R statistic for each of the correlation matrices
 in the brmsfit object
 }
 \description{
-This function encapsulates all of the computations associated with
-assessing phenotypic integration using a brmsfit object from a
-multiresponse model.
-}
-\details{
-#' @param fit A brmsfit object from a multiresponse model
-
 This function encapsulates all of the computations associated with
 assessing phenotypic integration using a brmsfit object from a
 multiresponse model. For example, the wild sunflower results distributed
@@ -39,9 +35,9 @@ mod_wild <- brm(wild_CN + wild_SLA + wild_branch + wild_stem +
                 family = "gaussian")
 }
 
-Once you've loaded this library, \code{mod_wild} is available for use. If you
-are familiar with \code{brms}, you can use any of the usual \code{brms} methods to
-learn more about it.
+Once you've loaded this library, \code{mod_wild} is available for use. See the
+example below. In addition, if you are familiar with \code{brms}, you can use
+any of the usual \code{brms} methods to learn more about \code{mod_wild}.
 }
 \examples{
 assemble_statistics(mod_wild)
