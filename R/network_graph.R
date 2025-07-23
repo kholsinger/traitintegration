@@ -8,26 +8,32 @@
 #' @param name The name of a ColorBrewer palette. This should be a diverging
 #' palette with at least 9 distinct colors. All diverging ColorBrewer palettes
 #' meet this requirement. Default: "RdBu"
+#' @param viridis Use a Viridis palette. If true, the turbo palette is used.
 #'
 #' @return A data frame with columns `color` and `label`. `label` is the
 #' correlation coefficient.
-apply_colors <- function(R, name = "RdBu") {
-  ## get database of information about ColorBrewer palettes
-  ##
-  tmp <- RColorBrewer::brewer.pal.info
-  pal <- which(rownames(tmp) == name)
-  ## get maximum number of colors in selected palette
-  ##
-  n_breaks <- tmp$maxcolors[pal]
-  if (n_breaks < 9) {
-    stop("Palette ", name, " contains fewer than 10 colors")
+apply_colors <- function(R, name = "RdBu", viridis = FALSE) {
+  if (viridis) {
+    my_palette <- viridis::turbo(256)
+    breaks <- seq(from = 1/256, to = 255/256, by = 1/256)
   } else {
-    n_breaks <- 9
+    ## get database of information about ColorBrewer palettes
+    ##
+    tmp <- RColorBrewer::brewer.pal.info
+    pal <- which(rownames(tmp) == name)
+    ## get maximum number of colors in selected palette
+    ##
+    n_breaks <- tmp$maxcolors[pal]
+    if (n_breaks < 9) {
+      stop("Palette ", name, " contains fewer than 10 colors")
+    } else {
+      n_breaks <- 9
+    }
+    my_palette <- RColorBrewer::brewer.pal(n_breaks, name)
+    ## This gets even spacing on [0, 1]
+    ##
+    breaks <- c(-0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8)
   }
-  my_palette <- RColorBrewer::brewer.pal(n_breaks, name)
-  ## This gets even spacing on [0, 1]
-  ##
-  breaks <- c(-0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8)
   color <- R
   for (i in 1:nrow(R)) {
     for (j in 1:ncol(R)) {
@@ -61,8 +67,10 @@ apply_colors <- function(R, name = "RdBu") {
 #' @param labels Labels for the nodes. If `NULL` then the names used in the
 #' `brms` model are also used here
 #' @param style Style of visualization, "arc" (default) or "line"
-#' @param palette RColorBrewer palette to use. See `apply_colors()` for
-#' details. Default: "RdBu"
+#' @param palette Color palette to use. See `apply_colors()` for
+#' details. Default: "RdBu" from RColorBrewer
+#' @param viridis Use viridis color palette instead of RColorBrewer. Default
+#' palette becomes turbo
 #'
 #' @return A list with two elements
 #'
@@ -72,7 +80,8 @@ apply_colors <- function(R, name = "RdBu") {
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
-                                       style = "arc", palette = "RdBu")
+                                       style = "arc", palette = "RdBu",
+                                       viridis = FALSE)
 {
   Omega <- get_Omega(output_model)
   model_df <- as.data.frame(output_model)
@@ -114,7 +123,7 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
                                                mode = "undirected",
                                                diag = FALSE)
 
-  igraph::E(graph)$Correlation <- apply_colors(R, palette)$color
+  igraph::E(graph)$Correlation <- apply_colors(R, palette, viridis)$color
   igraph::E(graph)$P_value <- weight_vector
 
   if (style == "arc") {

@@ -9,7 +9,8 @@ plot_posterior_correlation(
   output_model,
   labels = NULL,
   style = "arc",
-  palette = "RdBu"
+  palette = "RdBu",
+  viridis = FALSE
 )
 }
 \arguments{
@@ -20,8 +21,11 @@ plot_posterior_correlation(
 
 \item{style}{Style of visualization, "arc" (default) or "line"}
 
-\item{palette}{RColorBrewer palette to use. See \code{apply_colors()} for
-details. Default: "RdBu"}
+\item{palette}{Color palette to use. See \code{apply_colors()} for
+details. Default: "RdBu" from RColorBrewer}
+
+\item{viridis}{Use viridis color palette instead of RColorBrewer. Default
+palette becomes turbo}
 }
 \value{
 A list with two elements

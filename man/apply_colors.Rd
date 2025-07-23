@@ -4,7 +4,7 @@
 \alias{apply_colors}
 \title{Apply colors to a correlation matrix using ColorBrewer palettes}
 \usage{
-apply_colors(R, name = "RdBu")
+apply_colors(R, name = "RdBu", viridis = FALSE)
 }
 \arguments{
 \item{R}{A correlation matrix}
@@ -12,6 +12,8 @@ apply_colors(R, name = "RdBu")
 \item{name}{The name of a ColorBrewer palette. This should be a diverging
 palette with at least 9 distinct colors. All diverging ColorBrewer palettes
 meet this requirement. Default: "RdBu"}
+
+\item{viridis}{Use a Viridis palette. If true, the turbo palette is used.}
 }
 \value{
 A data frame with columns \code{color} and \code{label}. \code{label} is the

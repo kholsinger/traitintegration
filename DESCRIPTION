@@ -17,7 +17,8 @@ Imports:
     igraph,
     magrittr,
     matrixcalc,
-    RColorBrewer
+    RColorBrewer,
+    viridis
 Depends: 
     R (>= 3.5)
 LazyData: true
