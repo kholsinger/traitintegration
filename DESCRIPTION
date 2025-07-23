@@ -1,23 +1,28 @@
-Package: traitintegration
-Title: What the Package Does (One Line, Title Case)
+Package: distregress
+Type: Package
+Title: Distance regression with multimembership random effects
 Version: 0.1
-Authors@R: 
-    person("Kent", "Holsinger", , "kent.holsinger@uconn.edu", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-Imports: 
-    brms,
+Author: Kent Holsinger <kent.holsinger@uconn.edu>
+Maintainer: Kent Holsinger <kent.holsinger@uconn.edu>
+Description: This package regresses genetic distances lying in (0, 1) on a set of covariate distances. It uses multimembership random effects to reduce the covariance of residuals. Three models of multimembership random effects are available: MM (additive multimembership - as in brms), MMCAR (additive multimembership with multivariate normal prior based on spatial distances), SDMM (squared difference multimembership - as in spGDMMM - with multivariate normal prior based on spatial distances.
+License: GPL-3 + file LICENSE
+Depends:
+  R (>= 4.0.0)
+Imports:
+    cmdstanr (>= 0.8.1),
+    bayesplot,
+    posterior,
     dplyr,
-    ggplot2,
-    ggraph,
-    igraph,
     magrittr,
-    matrixcalc,
-    RColorBrewer
-Depends: 
-    R (>= 3.5)
+    readr,
+    tibble,
+    ggplot2,
+    loo,
+    rlang,
+    diptest
+Additional_repositories:
+  https://mc-stan.org/r-packages/
+SystemRequirements: CmdStan (https://mc-stan.org/users/interfaces/cmdstan)
+Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.3.2
