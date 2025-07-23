@@ -4,17 +4,18 @@
 \alias{apply_colors}
 \title{Apply colors to a correlation matrix using ColorBrewer palettes}
 \usage{
-apply_colors(R, name = "RdYlBu")
+apply_colors(R, name = "RdBu")
 }
 \arguments{
 \item{R}{A correlation matrix}
 
 \item{name}{The name of a ColorBrewer palette. This should be a diverging
-palette. Default: RdYlBu}
+palette with at least 9 distinct colors. All diverging ColorBrewer palettes
+meet this requirement. Default: "RdBu"}
 }
 \value{
-A list with named components \code{color} and \code{label}. \code{label} is the
-correlation coefficient
+A data frame with columns \code{color} and \code{label}. \code{label} is the
+correlation coefficient.
 }
 \description{
 This function is used internally to (a) translate correlation coefficients

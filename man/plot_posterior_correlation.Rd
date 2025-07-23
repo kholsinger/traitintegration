@@ -5,16 +5,27 @@
 \title{Visualize a the posterior distribution of a correlation matrix from
 the output of \code{brm()}}
 \usage{
-plot_posterior_correlation(output_model, labels = NULL)
+plot_posterior_correlation(
+  output_model,
+  labels = NULL,
+  style = "arc",
+  palette = "RdYlBu"
+)
 }
 \arguments{
 \item{output_model}{An object of class \code{brmsfit}}
 
 \item{labels}{Labels for the nodes. If \code{NULL} then the names used in the
 \code{brms} model are also used here}
+
+\item{style}{Style of visualization, "arc" (default) or "line"}
 }
 \value{
-A gggraph object that can be further modified
+A list with two elements
+
+\code{p} A gggraph object that can be further modified
+
+\code{R} The posterior mean correlation matrixtmp
 }
 \description{
 This function plots the posterior correlation matrix from a \code{brm()} analysis

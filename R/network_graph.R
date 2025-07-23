@@ -6,11 +6,12 @@
 #'
 #' @param R A correlation matrix
 #' @param name The name of a ColorBrewer palette. This should be a diverging
-#' palette. Default: RdYlBu
+#' palette with at least 9 distinct colors. All diverging ColorBrewer palettes
+#' meet this requirement. Default: "RdBu"
 #'
 #' @return A data frame with columns `color` and `label`. `label` is the
 #' correlation coefficient.
-apply_colors <- function(R, name = "RdYlBu") {
+apply_colors <- function(R, name = "RdBu") {
   ## get database of information about ColorBrewer palettes
   ##
   tmp <- RColorBrewer::brewer.pal.info
@@ -18,13 +19,15 @@ apply_colors <- function(R, name = "RdYlBu") {
   ## get maximum number of colors in selected palette
   ##
   n_breaks <- tmp$maxcolors[pal]
+  if (n_breaks < 9) {
+    stop("Palette ", name, " contains fewer than 10 colors")
+  } else {
+    n_breaks <- 9
+  }
   my_palette <- RColorBrewer::brewer.pal(n_breaks, name)
   ## This gets even spacing on [0, 1]
   ##
-  breaks <- seq(from = 0, to = n_breaks)/n_breaks
-  ## Shift it to [-1, 1]
-  ##
-  breaks <- 2*breaks - 1
+  breaks <- c(-0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8)
   color <- R
   for (i in 1:nrow(R)) {
     for (j in 1:ncol(R)) {
