@@ -18,7 +18,7 @@ in the brmsfit object
 This function encapsulates all of the computations associated with
 assessing phenotypic integration using a brmsfit object from a
 multiresponse model. For example, the wild sunflower results distributed
-with this package (in \code{mod_wild}) were produced from individual-level data
+with this package (in `mod_wild`) were produced from individual-level data
 with the following set of commands:
 
 \preformatted{
@@ -35,9 +35,9 @@ mod_wild <- brm(wild_CN + wild_SLA + wild_branch + wild_stem +
                 family = "gaussian")
 }
 
-Once you've loaded this library, \code{mod_wild} is available for use. See the
-example below. In addition, if you are familiar with \code{brms}, you can use
-any of the usual \code{brms} methods to learn more about \code{mod_wild}.
+Once you've loaded this library, `mod_wild` is available for use. See the
+example below. In addition, if you are familiar with `brms`, you can use
+any of the usual `brms` methods to learn more about `mod_wild`.
 }
 \examples{
 assemble_statistics(mod_wild)
