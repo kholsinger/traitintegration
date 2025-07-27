@@ -45,7 +45,7 @@ apply_colors <- function(R, name = "RdBu") {
     }
   }
   dat <- data.frame(color = color_vector,
-                    label = r_vector)
+                    label = round(r_vector, 3))
   return(dat)
 }
 
@@ -114,13 +114,19 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
                                                mode = "undirected",
                                                diag = FALSE)
 
-  igraph::E(graph)$Correlation <- apply_colors(R, palette)$color
+  df <- apply_colors(R)
+
+  igraph::E(graph)$Correlation <- df$color #apply_colors(R, palette)
+  igraph::E(graph)$label <- df$label
   igraph::E(graph)$P_value <- weight_vector
 
   if (style == "arc") {
     p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
       ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
-                                         edge_color = Correlation)) +
+                                         edge_color = Correlation,
+                                         label = label),
+                            angle_calc = "along",
+                            check_overlap = TRUE) +
       ggraph::geom_node_point(size = 5) +
       ggraph::geom_node_label(ggplot2::aes(label = name),
                               size = 5) +
@@ -128,7 +134,10 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
   } else if (style == "line") {
     p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
       ggraph::geom_edge_link(ggplot2::aes(edge_width = P_value,
-                                          edge_color = Correlation)) +
+                                          edge_color = Correlation,
+                                          label = label),
+                             angle_calc = "along",
+                             check_overlap = TRUE) +
       ggraph::geom_node_point(size = 5) +
       ggraph::geom_node_label(ggplot2::aes(label = name),
                               size = 5) +
