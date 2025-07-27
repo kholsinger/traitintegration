@@ -3,35 +3,43 @@
 \name{plot_posterior_correlation}
 \alias{plot_posterior_correlation}
 \title{Visualize a the posterior distribution of a correlation matrix from
-the output of \code{brm()}}
+the output of `brm()`}
 \usage{
 plot_posterior_correlation(
   output_model,
   labels = NULL,
   style = "arc",
-  palette = "RdBu"
+  palette = "RdBu",
+  label_edges = FALSE,
+  digits = 2
 )
 }
 \arguments{
-\item{output_model}{An object of class \code{brmsfit}}
+\item{output_model}{An object of class `brmsfit`}
 
-\item{labels}{Labels for the nodes. If \code{NULL} then the names used in the
-\code{brms} model are also used here}
+\item{labels}{Labels for the nodes. If `NULL` then the names used in the
+`brms` model are also used here}
 
 \item{style}{Style of visualization, "arc" (default) or "line"}
 
-\item{palette}{RColorBrewer palette to use. See \code{apply_colors()} for
+\item{palette}{RColorBrewer palette to use. See `apply_colors()` for
 details. Default: "RdBu"}
+
+\item{label_edges}{Label edges of graph with posterior mean correlation.
+Default: FALSE}
+
+\item{digits}{Number of digits to use in rounding posterior mean correlation
+(only relevant if label_edges == TRUE). Default: 2}
 }
 \value{
 A list with two elements
 
-\code{p} A gggraph object that can be further modified
+`p` A gggraph object that can be further modified
 
-\code{R} The posterior mean correlation matrixtmp
+`R` The posterior mean correlation matrixtmp
 }
 \description{
-This function plots the posterior correlation matrix from a \code{brm()} analysis
+This function plots the posterior correlation matrix from a `brm()` analysis
 as a series of arcs with the color of each connection representing the
 posterior mean of the correlation coefficient and the width representing
 the one-sided probability that the coefficient is different from 0.

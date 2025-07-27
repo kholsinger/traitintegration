@@ -63,6 +63,10 @@ apply_colors <- function(R, name = "RdBu") {
 #' @param style Style of visualization, "arc" (default) or "line"
 #' @param palette RColorBrewer palette to use. See `apply_colors()` for
 #' details. Default: "RdBu"
+#' @param label_edges Label edges of graph with posterior mean correlation.
+#' Default: FALSE
+#' @param digits Number of digits to use in rounding posterior mean correlation
+#' (only relevant if label_edges == TRUE). Default: 2
 #'
 #' @return A list with two elements
 #'
@@ -72,7 +76,10 @@ apply_colors <- function(R, name = "RdBu") {
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
-                                       style = "arc", palette = "RdBu")
+                                       style = "arc",
+                                       palette = "RdBu",
+                                       label_edges = FALSE,
+                                       digits = 2)
 {
   Omega <- get_Omega(output_model)
   model_df <- as.data.frame(output_model)
@@ -114,22 +121,40 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
                                                mode = "undirected",
                                                diag = FALSE)
 
-  igraph::E(graph)$Correlation <- apply_colors(R, palette)$color
+  df <- apply_colors(R)
+
+  igraph::E(graph)$Correlation <- df$color
+  igraph::E(graph)$label <- round(df$label, digits)
   igraph::E(graph)$P_value <- weight_vector
 
+  p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE)
   if (style == "arc") {
-    p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
-      ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
-                                         edge_color = Correlation)) +
-      ggraph::geom_node_point(size = 5) +
+    if (label_edges) {
+      p <- p + ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
+                                                  edge_color = Correlation,
+                                                  label = label),
+                                     angle_calc = "along",
+                                     check_overlap = TRUE)
+    } else {
+      p <- p + ggraph::geom_edge_arc(ggplot2::aes(edge_width = P_value,
+                                                  edge_color = Correlation))
+    }
+    p <- p + ggraph::geom_node_point(size = 5) +
       ggraph::geom_node_label(ggplot2::aes(label = name),
                               size = 5) +
       ggraph::theme_graph()
   } else if (style == "line") {
-    p <- ggraph::ggraph(graph, layout = "linear", circular = TRUE) +
-      ggraph::geom_edge_link(ggplot2::aes(edge_width = P_value,
-                                          edge_color = Correlation)) +
-      ggraph::geom_node_point(size = 5) +
+    if (label_edges) {
+      p <- p + ggraph::geom_edge_link(ggplot2::aes(edge_width = P_value,
+                                                   edge_color = Correlation,
+                                                   label = label),
+                                      angle_calc = "along",
+                                      check_overlap = TRUE)
+    } else {
+      p <- p + ggraph::geom_edge_link(ggplot2::aes(edge_width = P_value,
+                                                   edge_color = Correlation))
+    }
+    p <- p + ggraph::geom_node_point(size = 5) +
       ggraph::geom_node_label(ggplot2::aes(label = name),
                               size = 5) +
       ggraph::theme_graph()

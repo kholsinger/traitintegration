@@ -7,13 +7,13 @@
 report_trait_names(output_model)
 }
 \arguments{
-\item{output_model}{An object of class \code{brmsfit}}
+\item{output_model}{An object of class `brmsfit`}
 }
 \value{
 A vector of parameter names
 }
 \description{
 This is a utility function to make it easy to find the traits used in a
-\code{brms} analysis and to report them in the order they will appear when
+`brms` analysis and to report them in the order they will appear when
 the posterior correlation matrix is plotted
 }

@@ -14,7 +14,7 @@ palette with at least 9 distinct colors. All diverging ColorBrewer palettes
 meet this requirement. Default: "RdBu"}
 }
 \value{
-A data frame with columns \code{color} and \code{label}. \code{label} is the
+A data frame with columns `color` and `label`. `label` is the
 correlation coefficient.
 }
 \description{
