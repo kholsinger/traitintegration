@@ -1,28 +1,20 @@
-Package: distregress
+Package: traitintegration
 Type: Package
-Title: Distance regression with multimembership random effects
+Title: Visualizatiion and analysis of trait integration
 Version: 0.1
 Author: Kent Holsinger <kent.holsinger@uconn.edu>
 Maintainer: Kent Holsinger <kent.holsinger@uconn.edu>
-Description: This package regresses genetic distances lying in (0, 1) on a set of covariate distances. It uses multimembership random effects to reduce the covariance of residuals. Three models of multimembership random effects are available: MM (additive multimembership - as in brms), MMCAR (additive multimembership with multivariate normal prior based on spatial distances), SDMM (squared difference multimembership - as in spGDMMM - with multivariate normal prior based on spatial distances.
+Description: This package provides function to visualize the posterior distribution of correlation matrices and to calculate and report the posterior distribution of integration statistics: (1) the maximum eigenvalue of the correlation matrix, (2) the variance of eigenvalues, and (3) the value of the correlation coefficient in a constant correlation matrix that produces the same entropy as the observed correlation matrix.
 License: GPL-3 + file LICENSE
 Depends:
   R (>= 4.0.0)
 Imports:
-    cmdstanr (>= 0.8.1),
-    bayesplot,
-    posterior,
     dplyr,
-    magrittr,
-    readr,
-    tibble,
     ggplot2,
-    loo,
-    rlang,
-    diptest
-Additional_repositories:
-  https://mc-stan.org/r-packages/
-SystemRequirements: CmdStan (https://mc-stan.org/users/interfaces/cmdstan)
+    ggraph,
+    igraph,
+    matrixcalc,
+    RColorBrewer
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
