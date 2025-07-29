@@ -1,0 +1,6 @@
+This is a simple script to check that the brute force calculation of
+entropy when a correlation matrix has all values equal to r on the off-diagonal
+matches the analytical calculation.
+
+IT DOES! The largest difference is 3.55e-15 for r = 0.9 and k = 15.
+

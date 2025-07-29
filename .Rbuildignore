@@ -1,2 +1,4 @@
 ^traitintegration\.Rproj$
 ^\.Rproj\.user$
+^internal_checks/*
+

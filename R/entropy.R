@@ -4,6 +4,7 @@
 #' @param x A k x k covariance matrix
 #'
 #' @return The entropy of the corresponding multivariate normal distribution
+#' @export
 entropy <- function(x) {
   k <- ncol(x)
   ent <- k/2 + (k/2)*log(2*pi) + (1/2)*log(det(x))
