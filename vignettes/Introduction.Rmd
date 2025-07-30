@@ -1,0 +1,195 @@
+---
+title: "An overview of using `brms` and `traitintegration`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include = FALSE}
+library(traitintegration)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+## Introduction
+
+This vignette provides an overview of how to use `brms` to fit a Bayesian 
+multiple response model to traits measured on individuals. The goal in doing so 
+is to generate a posterior distribution for the correlation among traits. We 
+can then use this posterior distribution in the `traitintegration` package to
+estimate the posterior distribution of the maximum eigenvalue, the variance of
+eigenvalues, and entR as measures of trait integration. We will use the
+wild population data from [Helianthome](http://www.helianthome.org/) as an 
+example.
+
+## Fitting a model with `brms`
+
+First we retrieve the data from [Helianthome](http://www.helianthome.org/), 
+store it in a data frame called `dat`, and retain only the columns 
+`Leaf C N ratio`, `SLA`, `Primary branches`, `Stem diameter at flowering`,
+`Ligule length`, `Phyllaries length`, and `population_id`. Note: If you load the
+`readr` library, you don't need the `readr::` prefix for the `read_csv()`.
+
+```{r}
+## retrieve the phenotype matrix
+##
+phenos <- readr::read_csv("http://www.helianthome.org/rest/population/phenotype_matrix/wild",
+                          show_col_types = FALSE)
+# ## retrieve the list of populations (for population_id)
+# ##
+# populations <- readr::read_csv("http://www.helianthome.org/rest/population/list/",
+#                           show_col_types = FALSE)
+## retrieve individual id and population id
+##
+index <- readr::read_csv("http://www.helianthome.org/rest/individual/list/",
+                          show_col_types = FALSE)
+## merge population id into phenotypic data
+##
+wild <- merge(phenos, index, by = "individual_id") |>
+  dplyr::select(`Leaf C N ratio`, SLA, `Primary branches`,
+                `Stem diameter at flowering`, `Ligule length`,
+                `Phyllaries length`, population_id) |>
+  dplyr::rename(Leaf.C.N.ratio = `Leaf C N ratio`,
+                Primary.branches = `Primary branches`,
+                Stem.diameter.at.flowering = `Stem diameter at flowering`,
+                Ligule.length = `Ligule length`,
+                Phyllaries.length = `Phyllaries length`)
+```
+
+Now that we have the data, we can fit a model using `brms`. Specifically, we 
+will fit a model in which we simply fit a random intercept for each population.
+This means that the correlation matrix we estimate is the within-population 
+covariance matrix. The lines begininng `wild_` define linear models with a 
+random intercept for each of the six traits included in the analysis. They are
+combined into a single, multiresponse model using the `+` operator in the
+call to `brm`.
+
+The `set_rescor(rescor = TRUE)` argument tells `brms` to estimate correlations 
+among the traits. The `refresh = 0` prevents `brms` from telling us how many 
+iterations it is completing. The `options(mc.cores = parallel::detectCores())` 
+tells brms to use as many cores as you have (up to 4) to run the MCMC chains in
+parallel. Note: Just as above, if you load the`brms` library, you don't need the
+`brms::` prefix for the calls to `bf()` and `brm()`.
+
+```{r}
+options(mc.cores= parallel::detectCores())
+
+wild_CN <- brms::bf(Leaf.C.N.ratio ~ (1|population_id))
+wild_SLA <- brms::bf(SLA ~ (1|population_id))
+wild_branch <- brms::bf(Primary.branches ~ (1|population_id))
+wild_stem <- brms::bf(Stem.diameter.at.flowering ~ (1|population_id))
+wild_ligule <- brms::bf(Ligule.length ~ (1|population_id))
+wild_phyllary <- brms::bf(Phyllaries.length ~ (1|population_id))
+
+mod_wild <- brms::brm(wild_CN + wild_SLA + wild_branch + wild_stem +
+                        wild_ligule + wild_phyllary + 
+                        brms::set_rescor(rescor = TRUE),
+                      data = wild,
+                      family = "gaussian", 
+                      refresh = 0)
+```
+
+Notice that `brms` automatically excludes any individuals with missing data. Now
+that the model has finished, we can explore some of the results.
+
+```{r}
+summary(mod_wild)
+```
+
+The most important results here are that the `Rhat`s are all very close to 1.
+That means we have good evidence that the chains have converged. It's also good
+to see that both the `Bulk_ESS` and `Tail_ESS` are reasonably high (all above 
+6000), and especially that they are high for the `rescor` parameters. Those are
+the correlations that we're interested.
+
+## Visualizing the posterior correlation matrix
+
+With the fitted model in hand, visualizing the correlation matrix is 
+straightforward.
+
+```{r}
+plot_posterior_correlation(mod_wild)
+```
+
+The color of each edge reflects the posterior mean of the correlation coefficient
+for the nodes that are being connected, red for negative (< -0.2), blue for 
+positive (> 0.2), or white for intermediate (-0.2 to 0.2). If you have correlation
+coefficients that are especially large in magnitude, they will display as more 
+intense colors of red or blue.
+
+You will probably find the labels at each node a bit long. If you do, you can use the
+`labels` argument to give them new names. If you'd also like to see values for
+the individual correlation coefficients, you can set the `label_edges` argument
+to `TRUE`.
+
+```{r}
+plot_posterior_correlation(mod_wild, labels = c("Leaf CN", "SLA", "Branches",
+                                                "Stem diameter", "Ligules", 
+                                                "Phyllaries"),
+                           label_edges = TRUE)
+```
+
+If you look closely, you'll notice that not all of the edges are labeled. That's
+because some of those in the middle would overlap if they were displayed.
+
+You aren't stuck with the color palette used here. You can use any of the 
+diverging color palettes in `RColorBrewer`. You can also change the number of
+digits displayed by using the `digits` argument.
+
+## Estimating trait integration
+
+
+
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
