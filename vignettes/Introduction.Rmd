@@ -1,21 +1,23 @@
 ---
-title: "An overview of using `brms` and `traitintegration`"
+title: "Using `brms` and `traitintegration`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Using `brms` and `traitintegration`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-
-```{r setup, include = FALSE}
-library(traitintegration)
-
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
+
+```{r setup}
+library(traitintegration)
+```
+
 ## Introduction
 
 This vignette provides an overview of how to use `brms` to fit a Bayesian 
@@ -76,7 +78,7 @@ tells brms to use as many cores as you have (up to 4) to run the MCMC chains in
 parallel. Note: Just as above, if you load the`brms` library, you don't need the
 `brms::` prefix for the calls to `bf()` and `brm()`.
 
-```{r}
+```{r, eval = FALSE}
 options(mc.cores= parallel::detectCores())
 
 wild_CN <- brms::bf(Leaf.C.N.ratio ~ (1|population_id))
@@ -94,7 +96,7 @@ mod_wild <- brms::brm(wild_CN + wild_SLA + wild_branch + wild_stem +
                       refresh = 0)
 ```
 
-Notice that `brms` automatically excludes any individuals with missing data. Now
+`brms` will automatically exclude any individuals with missing data. Now
 that the model has finished, we can explore some of the results.
 
 ```{r}
@@ -110,10 +112,13 @@ the correlations that we're interested.
 ## Visualizing the posterior correlation matrix
 
 With the fitted model in hand, visualizing the correlation matrix is 
-straightforward.
+straightforward. If you store the result of the call to `plot_posterior_correlation()`
+in a variable, say `p`, you can print the posterior mean correlation matrix as
+shown below.
 
 ```{r}
-plot_posterior_correlation(mod_wild)
+p <- plot_posterior_correlation(mod_wild)
+print(p$R)
 ```
 
 The color of each edge reflects the posterior mean of the correlation coefficient
@@ -125,12 +130,13 @@ intense colors of red or blue.
 You will probably find the labels at each node a bit long. If you do, you can use the
 `labels` argument to give them new names. If you'd also like to see values for
 the individual correlation coefficients, you can set the `label_edges` argument
-to `TRUE`.
+to `TRUE`. Note: storing the result of the call to `plot_posterior_correlation()`
+in `p` to suppresses printing of the posterior correlation matrix.
 
 ```{r}
-plot_posterior_correlation(mod_wild, labels = c("Leaf CN", "SLA", "Branches",
-                                                "Stem diameter", "Ligules", 
-                                                "Phyllaries"),
+p <- plot_posterior_correlation(mod_wild, labels = c("Leaf CN", "SLA", "Branches",
+                                                     "Stems", "Ligules", 
+                                                     "Phyllaries"),
                            label_edges = TRUE)
 ```
 
@@ -143,53 +149,44 @@ digits displayed by using the `digits` argument.
 
 ## Estimating trait integration
 
+Estimating trait integration is straightforward. We simply call the 
+`assemble_statistics()` function with the fitted model as the argument. It is
+best to store the result in a variable, say `results`, so that you can work
+with the results.
 
+```{r}
+results <- assemble_statistics(mod_wild)
+str(results)
+```
+As you can see, `results` is a data frame in which the columns starting with 
+`EV_` are the eigenvalues of the correlation matrix, `Lead_EV` is the lead eigenvalue,
+`Var_EV` is the variance of the eigenvalues, and `ent_R` the entropy measure
+of trait integration. The rows of the data frame correspond to samples from
+the posterior distribution.
 
+You can summarize the results using the `summarize_statistics()` function.
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r}
+summarize_statistics(results)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+By default the data frame that is returned contains the posterior mean and the
+2.5% and 97.5% quantiles of the statistic and rounds the results to 3 digits, but
+those options are easy to change.
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+summarize_statistics(results, probs = c(0.025, 0.05, 0.5, 0.95, 0.975), digits = 2)
 ```
 
-Also a quote using `>`:
+You can also visualize the posterior distribution of any column using functions
+from the `bayesplot` package. For example, you can visualize the
+posterior distributions of the lead eigenvalue, variance of eigenvalues, and entR 
+as follows (and as before, you can leave off the `bayesplot::` and ``ggplot2::`
+prefixes if you've loaded those libraries):
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+```{r}
+bayesplot::mcmc_areas(results[, c("Lead_EV", "Var_EV", "ent_R")])
+```
+
+Note: You will only be able to use `bayesplot` functions that expect all chains
+to be merged, e.g., `mcmc_areas()`, `mcmc_intervals()`, mcmc_hist()`, and `mcmc_dens()`. 
