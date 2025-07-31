@@ -21,8 +21,7 @@ you don't already have it, simply
 
 Once you've done that, simply
 
-    `devtools::install_github("kholsinger/traitintegration",
-build_vignettes = TRUE)`. 
+    `devtools::install_github("kholsinger/traitintegration", build_vignettes = TRUE)`. 
 
 It will churn for a while, and you may be
 asked to install some new packages, upgrade some existing packages, or
