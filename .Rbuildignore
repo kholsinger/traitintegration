@@ -1,4 +1,7 @@
 ^traitintegration\.Rproj$
 ^\.Rproj\.user$
 ^internal_checks/*
+^vignettes/Introduction_files/*
+^vignettes/*.html
+
 
