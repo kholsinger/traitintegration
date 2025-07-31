@@ -4,5 +4,6 @@
 ^vignettes/Introduction_files/*
 ^vignettes/*.html
 ^README.md$
+^_config.yml$
 
 
