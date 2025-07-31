@@ -16,18 +16,26 @@ integration. It provides functions to use the output of an analysis by
 
 To install `traitintegration` you will need the `devtools` package. If
 you don't already have it, simply 
+
     `install.packages("devtools")`. 
+
 Once you've done that, simply
+
     `devtools::install_github("kholsinger/traitintegration",
 build_vignettes = TRUE)`. 
+
 It will churn for a while, and you may be
 asked to install some new packages, upgrade some existing packages, or
 both. 
 
 Assuming that the installations succeeds, simply
+
     `library(traitintegration)` 
-and 
+
+and
+
     `vignette("Introduction", package = "traitintegration")` 
+
 to get an overview of how to use `traitintegration`. You can also look
 at the vignette here simply by clicking the following link: 
 [Using `brms` and `traitintegration`](https://kholsinger.github.io/traitintegration/vignettes/Introduction.html) 
