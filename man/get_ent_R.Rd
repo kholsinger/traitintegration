@@ -6,14 +6,10 @@
 pairwise correlations equal that has an entropy equivalent to the
 observed entropy.}
 \usage{
-get_ent_R(Omega, min_ent = 0.01, max_ent = 0.99, tol = 1e-14)
+get_ent_R(Omega, tol = 1e-14)
 }
 \arguments{
 \item{Omega}{An n_iter x n_traits x n_traits array of correlation matrices}
-
-\item{min_ent}{The minimum entropy at which to begin the binary search}
-
-\item{max_ent}{The maximum entropy at which to begin the binary search}
 
 \item{tol}{Stop the search when the entropy difference is less than tol}
 }
