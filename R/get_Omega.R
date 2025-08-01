@@ -53,6 +53,17 @@ get_Omega <- function(output_model) {
 #' in the matrix must be a perfect square, and the square root of the number
 #' of rows must be equal to the number of traits.
 #'
+#' The algorithm gets more than a little complicated because with bootstrap
+#' sampling in a hierarchical structure, any given bootstrap sample could
+#' have only one individual from a lower level sampling unit, meaning that
+#' there isn't any within population scaling. The result correlation matrix
+#' will be filled with NAs. It is also possible for the sampling to result
+#' in one trait having no varition in a lower level sampling unit, which will
+#' result in NAs for correlations involving that trait, but not others. As a
+#' result, the return value from this function may have a first dimension
+#' somewhat smaller than n_iter (in spite of what's said in the return
+#' documentation).
+#'
 #' @param sample The bootstrap sample
 #'
 #' @return An n_iter x trait x trait array
@@ -73,6 +84,26 @@ get_Omega_boot <- function(sample) {
         Omega[i, j, k] <- thetastar[ct, i]
       }
     }
+  }
+  if (sum(is.na(Omega) > 0)) {
+    i <- 1
+    while (sum(is.na(Omega[i, , ]) > 0)) {
+      i <- i + 1
+    }
+    Omega_tmp <- array(dim = c(1, n_traits, n_traits))
+    Omega_tmp[1, , ] <- Omega[1, , ]
+    ct <- 1
+    while (i <= dim(Omega)[1]) {
+      if (sum(is.na(Omega[i, , ]) == 0)) {
+        new_Omega <- array(dim = c(ct + 1, n_traits, n_traits))
+        new_Omega[1:ct, , ] <- Omega_tmp
+        new_Omega[ct + 1, , ] <- Omega[i, , ]
+        Omega_tmp <- new_Omega
+        ct <- ct + 1
+      }
+      i <- i + 1
+    }
+    Omega <- Omega_tmp
   }
   return(Omega)
 }

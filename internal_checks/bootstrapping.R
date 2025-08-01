@@ -42,33 +42,59 @@ scale_within_population <- function(dat, pop) {
 }
 
 scale_within_populations <- function(dat) {
-  pops <- unique(wild$population_id)
-  tmp <- scale_within_population(wild, pops[1])
+  pops <- unique(dat$population_id)
+  tmp <- scale_within_population(dat, pops[1])
   for (i in 2:length(pops)) {
     tmp <- tibble::add_row(tmp,
-                           scale_within_population(wild, pops[i]))
+                           scale_within_population(dat, pops[i]))
   }
+  na_rows <- tmp |>
+    dplyr::filter(is.na(Leaf.C.N.ratio) &
+                  is.na(SLA) &
+                  is.na(Primary.branches) &
+                  is.na(Stem.diameter.at.flowering) &
+                  is.na(Ligule.length) &
+                  is.na(Phyllaries.length))
+  if (nrow(na_rows) > 0) {
+    print(na_rows)
+  }
+  print(summary(tmp))
   return(tmp)
 }
 
 correlation_within_populations <- function(dat) {
   tmp <- scale_within_populations(dat)
+  print(table(dat$population_id))
   R <- cor(tmp[, 1:6])
   return(R)
 }
 
 theta <- function(x, x_data) {
- R <- correlation_within_populations(dat[x, 1:6])
+  R <- correlation_within_populations(x_data[x, ])
 }
 
-boot_results <- bootstrap::bootstrap(1:nrow(wild), 4000, theta, x_data)
+bootstrap <- function(n_sample, dat) {
+  n_traits <- ncol(dat) - 1
+  Omega <- array(dim = c(n_sample, n_traits, n_traits))
+  for (i in 1:n_sample) {
+    rows <- sample(1:nrow(dat), nrow(dat), replace = TRUE)
+    R <- correlation_within_populations(dat[rows, ])
+    print(round(R, 3))
+    for (j in 1:n_traits) {
+      for (k in 1:n_traits) {
+        Omega[i, j, k] <- R[j, k]
+      }
+    }
+  }
+  return(Omega)
+}
 
-## boot_results is a matrix with 36 columns and 4000 rows. That will
-## need to be converted to a format compatible with the array that
-## the other functions are expecting
-##
-## but boot_results isn't right. It's returning the same result every time
-## I'll hard code it
+boot_results <- bootstrap::bootstrap(1:nrow(wild), 10, theta, wild)
+## Sometimes bootstrap sampling will result in NAs for correlation entries,
+## most often when only one individual is left in a population, but it
+## happened at least once when there wasn't any variation in branch number
+## within one population in one bootstrap replicate
+
 
 
 
