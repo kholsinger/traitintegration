@@ -71,24 +71,11 @@ get_ent_R <- function(Omega, tol = 1.0e-14) {
   f_min_r <- entropy_omega(min_r, k)
   f_max_r <- entropy_omega(max_r, k)
   for (i in 1:n_ent) {
-    cat(i, "of", n_ent, "\n")
     min <- min_r
     max <- max_r
     while (diff > tol)  {
-      ## min_val <- entropy_omega(min, k)
-      ## mid_val <- entropy_omega(mid, k)
-      ## cat(min_val, mid_val, max_val, "\n")
-      ## stopifnot((min_val > ent_obs[i]) & (max_val < ent_obs[i]))
-      ## if (mid_val < ent_obs[i]) {
-      ##   max <- mid
-      ## } else {
-      ##   min <- mid
-      ## }
-      ## mid <- (max + min)/2.0
-      ## diff <- abs(mid_val - ent_obs[i])
       mid <- (max + min)/2.0
       f_mid_r <- entropy_omega(mid, k)
-      cat(f_min_r, f_mid_r, f_max_r, diff, "\n")
       if (f_mid_r < ent_obs[i]) {
         max <- mid
         f_max_r <- f_mid_r

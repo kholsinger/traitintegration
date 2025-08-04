@@ -187,7 +187,9 @@ as follows (and as before, you can leave off the `bayesplot::` and ``ggplot2::`
 prefixes if you've loaded those libraries):
 
 ```{r}
-bayesplot::mcmc_areas(results[, c("Lead_EV", "Var_EV", "ent_R")])
+bayesplot::mcmc_areas(results, pars = c("Lead_EV", "Var_EV", "ent_R"),
+                      prob = 0.95) +
+  ggplot2::labs(x = "Trait integration statistics")
 ```
 
 Note: You will only be able to use `bayesplot` functions that expect all chains
