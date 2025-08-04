@@ -52,6 +52,7 @@ apply_colors <- function(R, name = "RdBu") {
 #' Visualize a the posterior distribution of a correlation matrix from
 #' the output of `brm()`
 #'
+#' @description
 #' This function plots the posterior correlation matrix from a `brm()` analysis
 #' as a series of arcs with the color of each connection representing the
 #' posterior mean of the correlation coefficient and the width representing
@@ -72,7 +73,7 @@ apply_colors <- function(R, name = "RdBu") {
 #'
 #' `p` A gggraph object that can be further modified
 #'
-#' `R` The posterior mean correlation matrixtmp
+#' `R` The posterior mean correlation matrix
 #'
 #' @export
 plot_posterior_correlation <- function(output_model, labels = NULL,
@@ -86,16 +87,81 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
   tmp <- model_df %>%
     dplyr::select(starts_with("b_"))
   traits <- gsub("b_(.*)_Intercept", "\\1", colnames(tmp))
-
-  n_traits <- length(traits)
-  R <- matrix(nrow = n_traits, ncol = n_traits)
   if (is.null(labels)) {
-    colnames(R) <- traits
-    rownames(R) <- traits
-  } else {
-    colnames(R) <- labels
-    rownames(R) <- labels
+    labels <- traits
   }
+  p <- plotter_for_posterior_correlation(Omega, labels, style, palette,
+                                         label_edges, digits)
+  return(p)
+}
+
+#' Visualize a the posterior distribution of a correlation matrix from
+#' a bootstrap sample of correlation matrices
+#'
+#' @description
+#' This function plots the posterior correlation matrix from a bootstrapped
+#' sample of correlation matrices. It consists ofa series of arcs with the
+#' color of each connection representing the posterior mean of the correlation
+#' coefficient and the width representing the one-sided probability that the
+#' coefficient is different from 0.
+#'
+#' @param Omega A n_sample x n_trait x n_trait array of correlation matrices
+#' @param labels Labels for the nodes. If `NULL` then the names are the
+#' columnnames of Omega
+#' @param style Style of visualization, "arc" (default) or "line"
+#' @param palette RColorBrewer palette to use. See `apply_colors()` for
+#' details. Default: "RdBu"
+#' @param label_edges Label edges of graph with posterior mean correlation.
+#' Default: FALSE
+#' @param digits Number of digits to use in rounding posterior mean correlation
+#' (only relevant if label_edges == TRUE). Default: 2
+#'
+#' @return A list with two elements
+#'
+#' `p` A gggraph object that can be further modified
+#'
+#' `R` The posterior mean correlation matrix
+#'
+#' @export
+plot_posterior_correlation_boot <- function(Omega, labels = NULL,
+                                            style = "arc",
+                                            palette = "RdBu",
+                                            label_edges = FALSE,
+                                            digits = 2)
+{
+  labels <- colnames(Omega)
+  p <- plotter_for_posterior_correlation(Omega, labels, style, palette,
+                                         label_edges, digits)
+}
+
+#' Internal function to make plot
+#'
+#' @description
+#' This function is used internally to plot a representation of the
+#' posterior correlation matrix. It is called by either
+#' `plot_posterior_correlation()` for analyses using `brms` or
+#' `plot_posterior_correlation_boot()` for analyses using a hand-coded
+#' bootstrap sample.
+#'
+#' @param Omega A n_sample x n_trait x n_trait array of correlation matrices
+#' @param labels Labels for the nodes
+#' @param style Style of visualization
+#' @param palette RColorBrewer palette to use
+#' @param label_edges Label edges of graph with posterior mean correlation
+#' @param digits Number of digits to use
+#'
+#' @return A list with two elements
+#'
+#' `p` A ggraph object
+#'
+#' `R` The posterior mean correlation matrix
+plotter_for_posterior_correlation <- function(Omega, labels, style, palette,
+                                              label_edges, digits)
+{
+  n_traits <- length(labels)
+  R <- matrix(nrow = n_traits, ncol = n_traits)
+  colnames(R) <- labels
+  rownames(R) <- labels
   weight <- R
   for (i in 1:n_traits) {
     for (j in 1:n_traits) {
@@ -164,4 +230,3 @@ plot_posterior_correlation <- function(output_model, labels = NULL,
   print(p)
   return(list(p = p, R = R))
 }
-

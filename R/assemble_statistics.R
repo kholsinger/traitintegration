@@ -42,3 +42,27 @@ assemble_statistics <- function(fit) {
   df <- cbind(eigen_stats, ent_R)
   return(df)
 }
+
+#' Assemble eigenvalue and entR statistics from posterior samples
+#'
+#' @description
+#' This function encapsulates all of the computations associated with
+#' assessing phenotypic integration using a bootstrap sample of correlation
+#' matrices. See `vignette("Bootstrapping", package = "traitintegration")`
+#' for a complete example.
+#'
+#' @param sample A bootstrap sample of correlation matrices. Each row
+#' is the bootstrap sample for one element of the correlation matrix.
+#'
+#' @return A data frame with the eigenvalues, lead eigenvalue, variance
+#' of eigenvalues, and ent_R statistic for each of the correlation matrices
+#' in the bootstrap sample
+#'
+#' @export
+assemble_statistics_boot <- function(sample) {
+##  Omega <- get_Omega_boot(sample)
+  eigen_stats <- get_eigen(Omega)
+  ent_R <- get_ent_R(Omega)
+  df <- cbind(eigen_stats, ent_R)
+  return(df)
+}

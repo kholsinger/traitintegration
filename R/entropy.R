@@ -53,8 +53,6 @@ entropy_omega <- function(r, k) {
 #' observed entropy.
 #'
 #' @param Omega An n_iter x n_traits x n_traits array of correlation matrices
-#' @param min_ent The minimum entropy at which to begin the binary search
-#' @param max_ent The maximum entropy at which to begin the binary search
 #' @param tol Stop the search when the entropy difference is less than tol
 #'
 #' @return A vector of r equivalents, i.e., the pairwise corrleation in a
@@ -62,28 +60,30 @@ entropy_omega <- function(r, k) {
 #' the vector of entropies supplied
 #'
 #' @export
-get_ent_R <- function(Omega, min_ent = 0.01, max_ent = 0.99, tol = 1.0e-14) {
+get_ent_R <- function(Omega, tol = 1.0e-14) {
   n_ent <- dim(Omega)[1]
   k <- dim(Omega)[2]
   ent_obs <- get_entropy(Omega)
   ent_R <- numeric(n_ent)
   diff <- 1.0
+  min_r <- 1.0e-16
+  max_r <- 1 - min_r
+  f_min_r <- entropy_omega(min_r, k)
+  f_max_r <- entropy_omega(max_r, k)
   for (i in 1:n_ent) {
-    min <- min_ent
-    max <- max_ent
-    mid <- (max + min)/2.0
+    min <- min_r
+    max <- max_r
     while (diff > tol)  {
-      min_val <- entropy_omega(min, k)
-      mid_val <- entropy_omega(mid, k)
-      max_val <- entropy_omega(max, k)
-      stopifnot((min_val > ent_obs[i]) & (max_val < ent_obs[i]))
-      if (mid_val < ent_obs[i]) {
+      mid <- (max + min)/2.0
+      f_mid_r <- entropy_omega(mid, k)
+      if (f_mid_r < ent_obs[i]) {
         max <- mid
+        f_max_r <- f_mid_r
       } else {
         min <- mid
+        f_min_r <- f_mid_r
       }
-      mid <- (max + min)/2.0
-      diff <- abs(mid_val - ent_obs[i])
+      diff <- abs(f_mid_r - ent_obs[i])
     }
     ent_R[i] <- mid
     diff <- 1.0
