@@ -59,8 +59,7 @@ assemble_statistics <- function(fit) {
 #' in the bootstrap sample
 #'
 #' @export
-assemble_statistics_boot <- function(sample) {
-##  Omega <- get_Omega_boot(sample)
+assemble_statistics_boot <- function(Omega) {
   eigen_stats <- get_eigen(Omega)
   ent_R <- get_ent_R(Omega)
   df <- cbind(eigen_stats, ent_R)

@@ -1,0 +1,221 @@
+---
+title: "Bootstrapping and trait integration"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bootstrapping and trait integration}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+```{r setup}
+library(traitintegration)
+```
+
+## Introduction
+
+Once you've learned the syntax for `brms`, using for analyses of ttrait 
+integration is very straightforward. But you don't have to use `brms`. If you're
+willing to write your own bootstrap code, you can use functions written to 
+process bootstrap samples to do the same analyses as you'd do with the model
+output from `brms`. This vignette uses the same data as in 
+`vignette("Introduction")`.
+
+## Using bootstrapping to get a sample of correlation matrices
+
+First we retrieve the data from [Helianthome](http://www.helianthome.org/), 
+store it in a data frame called `dat`, and retain only the columns 
+`Leaf C N ratio`, `SLA`, `Primary branches`, `Stem diameter at flowering`,
+`Ligule length`, `Phyllaries length`, and `population_id`. Note: If you load the
+`readr` library, you don't need the `readr::` prefix for the `read_csv()`.
+
+```{r}
+## retrieve the phenotype matrix
+##
+phenos <- readr::read_csv("http://www.helianthome.org/rest/population/phenotype_matrix/wild",
+                          show_col_types = FALSE)
+# ## retrieve the list of populations (for population_id)
+# ##
+# populations <- readr::read_csv("http://www.helianthome.org/rest/population/list/",
+#                           show_col_types = FALSE)
+## retrieve individual id and population id
+##
+index <- readr::read_csv("http://www.helianthome.org/rest/individual/list/",
+                          show_col_types = FALSE)
+## merge population id into phenotypic data
+##
+wild <- merge(phenos, index, by = "individual_id") |>
+  dplyr::select(`Leaf C N ratio`, SLA, `Primary branches`,
+                `Stem diameter at flowering`, `Ligule length`,
+                `Phyllaries length`, population_id) |>
+  dplyr::rename(Leaf.C.N.ratio = `Leaf C N ratio`,
+                Primary.branches = `Primary branches`,
+                Stem.diameter.at.flowering = `Stem diameter at flowering`,
+                Ligule.length = `Ligule length`,
+                Phyllaries.length = `Phyllaries length`) |>
+  dplyr::filter(!is.na(Leaf.C.N.ratio) &
+                !is.na(SLA) &
+                !is.na(Primary.branches) &
+                !is.na(Stem.diameter.at.flowering) &
+                !is.na(Ligule.length) &
+                !is.na(Phyllaries.length)) |>
+  dplyr::relocate("population_id")
+```
+
+Notice that unlike when we use `brms` we have to explicitly drop individuals with
+incomplete data. We also `relocate()` the `population_id` column to the front of 
+the data frame for convenience with later processing.
+
+Let's talk through the logic of bootstrapping these data before we present the
+code. Recall that the individuals are nested within populations and that we're
+interested in estimating the within-population correlation matrix. This means
+that we need to center and scale the traits *within populations* after selecting
+each bootstrap sample. We also will store the bootstrap sample as a 
+three-dimensional array with the first dimension being the number of bootstrap
+samples, and the second two being the rows and columns of the correlation
+matrics.^[This format matches the format of the posterior correlation matrix 
+returned from `brms` after processing with `get_Omega()`.] Notice that we have
+to be careful with the scaling step, because scaling can fail for one of two
+legitimate reasons.
+
+1. A particular bootstrap sample may include only one individual from that 
+population. If so, the standard deviation is 0 and scaling produces NaNs.
+2. A particular bootstrap sample may include multiple individuals, but a 
+particular trait (or traits) may not have any variation, which produces NAs. 
+
+If either of those conditions occur, we drop that population from the 
+bootstrap sample that is used to estimate the within-population correlation
+coefficient. One other thing to note: The code below includes 
+`use = "complete.obs"` in the call to `cor()`. This probably isn't necessary
+given the earlier filtering, but this option ensures that all of the 
+correlation matrices are positive definite as is required for them to be
+valid.
+
+```{r, eval = FALSE}
+scale_within_population <- function(dat, pop) {
+  tmp <- subset(dat, population_id == pop)
+  tmp <- as.data.frame(scale(tmp[, -1]))
+  col_names <- c(colnames(tmp), "population_id")
+  tmp <- tibble::add_column(tmp, pop)
+  colnames(tmp) <- col_names
+  tmp <- tmp |>
+    dplyr::relocate(population_id)
+  return(tmp)
+}
+
+scaling_valid <- function(dat) {
+  tmp <- as.matrix(dat[, -1])
+  result <- sum(is.nan(tmp))
+  result <- result & sum(is.na(tmp))
+  return(result == 0)
+}
+
+scale_within_populations <- function(dat) {
+  pops <- unique(dat$population_id)
+  tmp <- scale_within_population(dat, pops[1])
+  for (i in 2:length(pops)) {
+    scaled <- scale_within_population(dat, pops[i])
+    ## don't include populations where scaling fails
+    ##
+    if (scaling_valid(scaled)) {
+      tmp <- tibble::add_row(tmp, scaled)
+    }
+  }
+  return(tmp)
+}
+
+correlation_within_populations <- function(dat) {
+  tmp <- scale_within_populations(dat)
+  R <- cor(tmp[, -1], use = "complete.obs")
+  return(R)
+}
+
+bootstrap <- function(n_sample, dat) {
+  n_traits <- ncol(dat) - 1
+  Omega <- array(dim = c(n_sample, n_traits, n_traits),
+                 dimnames = list(paste("Sample", 1:n_sample, sep = ""),
+                                 colnames(dat)[-1],
+                                 colnames(dat)[-1]))
+  for (i in 1:n_sample) {
+    rows <- sample(1:nrow(dat), nrow(dat), replace = TRUE)
+    R <- correlation_within_populations(dat[rows, ])
+    Omega[i, , ] <- R
+  }
+  return(Omega)
+}
+
+n_sample <- 1000
+boot_Omega <- bootstrap(n_sample,  wild)
+```
+
+## Visualizing the posterior correlation matrix
+
+Now that we have our bootstrap samples, we can visualize the correlation matrix
+and print the bootstrap mean correlation matrix in the same way as we do with 
+posterior samples from `brms`. The only difference is that we append `_boot` to
+the call to `plot_posterior_correlation()`. `plot_posterior_correlation_boot()`
+provides the same options to adjust the display as `plot_posterior_correlation()`.
+The plot below uses the default options
+
+```{r}
+post_corr <- plot_posterior_correlation_boot(boot_Omega)
+print(round(post_corr$R, 3))
+```
+
+## Estimating trait integration
+
+Estimating trait integration is straightforward. With a bootstrap sample
+we simply call the `assemble_statistics_boot()` function with the bootstrap
+sample of correlation matrices. It is best to store the result in a variable, 
+say `results`, so that you can work with the results.
+
+```{r}
+results <- assemble_statistics_boot(boot_Omega)
+str(results)
+```
+
+As you can see, `results` is a data frame in which the columns starting with 
+`EV_` are the eigenvalues of the correlation matrix, `Lead_EV` is the lead eigenvalue,
+`Var_EV` is the variance of the eigenvalues, and `ent_R` the entropy measure
+of trait integration. The rows of the data frame correspond to samples from
+the posterior distribution.
+
+You can summarize the results using the `summarize_statistics()` function.^[Notice 
+that there's no `_boot` suffix on this call. It's the same function as used in 
+analysis of output from a `brms` model.]
+
+```{r}
+summarize_statistics(results)
+```
+
+Since `results` from a call to `assemble_statistics_boot()` is in the same format
+as from a call to `assemble_statistics()`, you can visualize the posterior 
+distribution of any column using functions from the `bayesplot` package just as
+when analyzing results of an analysis with `brms`. For example, you can visualize the
+posterior distributions of the lead eigenvalue, variance of eigenvalues, and entR 
+as follows (and as before, you can leave off the `bayesplot::` and ``ggplot2::`
+prefixes if you've loaded those libraries):
+
+```{r}
+bayesplot::mcmc_areas(results, pars = c("Lead_EV", "Var_EV", "ent_R"),
+                      prob = 0.95) +
+  ggplot2::labs(x = "Trait integration statistics")
+```
+
+Note: You will only be able to use `bayesplot` functions that expect all chains
+to be merged, e.g., `mcmc_areas()`, `mcmc_intervals()`, mcmc_hist()`, and `mcmc_dens()`.
+
+## Final note
+
+In case you're interested, getting a posterior sample of 4000 correlation matrices
+from `brms` takes about 40 seconds on a 16 inch 2023 MacBook Pro with an Apple M3 
+processor and 36 GB of RAM. Getting bootstrap sample of 1000 correlation matrices 
+takes about 50 seconds on the same machine.

@@ -4,7 +4,7 @@
 \alias{assemble_statistics_boot}
 \title{Assemble eigenvalue and entR statistics from posterior samples}
 \usage{
-assemble_statistics_boot(sample)
+assemble_statistics_boot(Omega)
 }
 \arguments{
 \item{sample}{A bootstrap sample of correlation matrices. Each row

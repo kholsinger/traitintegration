@@ -1,7 +1,7 @@
 Package: traitintegration
 Type: Package
 Title: Visualizatiion and analysis of trait integration
-Version: 0.1
+Version: 0.2
 Author: Kent Holsinger <kent.holsinger@uconn.edu>
 Maintainer: Kent Holsinger <kent.holsinger@uconn.edu>
 Description: This package provides function to visualize the posterior distribution of correlation matrices and to calculate and report the posterior distribution of integration statistics: (1) the maximum eigenvalue of the correlation matrix, (2) the variance of eigenvalues, and (3) the value of the correlation coefficient in a constant correlation matrix that produces the same entropy as the observed correlation matrix.

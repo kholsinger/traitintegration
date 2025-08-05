@@ -29,7 +29,9 @@ can then use this posterior distribution in the `traitintegration` package to
 estimate the posterior distribution of the maximum eigenvalue, the variance of
 eigenvalues, and entR as measures of trait integration. We will use the
 wild population data from [Helianthome](http://www.helianthome.org/) as an 
-example.
+example.^[If you are unfamiliar with `brms` or if you'd simply prefer to work
+with bootstrap samples of correlation matrices, see `vignette("Bootstrapping")` 
+for an extended example.]
 
 ## Fitting a model with `brms`
 
