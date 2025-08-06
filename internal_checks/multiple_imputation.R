@@ -38,22 +38,40 @@ mod_wild <- brms::brm(wild_CN + wild_SLA + wild_branch + wild_stem +
                       family = "gaussian",
                       refresh = 0)
 
-m <- 10
+m <- 4
 imp <- mice::mice(wild, m = m)
 mod_imp <- brms::brm_multiple(wild_CN + wild_SLA + wild_branch + wild_stem +
                                 wild_ligule + wild_phyllary +
                                 brms::set_rescor(rescor = TRUE),
                               data = imp,
                               family = "gaussian",
-                              refresh = 0,
-                              chains = 4)
+                              refresh = 0)
 
 cat("Original dataset...\n")
-posterior::as_draws(mod_wild) |>
+tmp <- posterior::as_draws(mod_wild) |>
+  posterior::subset_draws(variable = "^Intercept_", regex = TRUE) |>
+  posterior::summarise_draws()
+print(tmp)
+tmp <- posterior::as_draws(mod_wild) |>
   posterior::subset_draws(variable = "^sd_", regex = TRUE) |>
   posterior::summarise_draws()
+print(tmp)
 cat("Imputed datasets (", m, ")...\n")
-as_draws(mod_imp) |>
-  posterior::subset_draws(variable = "^sd_", regex = TRUE) |>
+tmp <- posterior::as_draws(mod_imp) |>
+  posterior::subset_draws(variable = "^Intercept_", regex = TRUE) |>
   posterior::summarise_draws()
+print(tmp)
+tmp <- posterior::as_draws(mod_imp) |>
+  posterior::subset_draws(variable = "^sd_", regex = TRUE) |>
+  posterior::summarise_draws(default_summary_measures())
+print(tmp)
+draws <- posterior::as_draws_array(mod_imp) |>
+  posterior::subset_draws(variable = "^Intercept_", regex = TRUE)
+draws_per_dat <- lapply(1:m, \(i) summarize_draws(draws, chain = (i-1)*m + i))
+lapply(draws_per_dat, summarize_draws, default_convergence_measures())
+draws <- posterior::as_draws_array(mod_imp) |>
+  posterior::subset_draws(variable = "^sd_", regex = TRUE)
+draws_per_dat <- lapply(1:m, \(i) summarize_draws(draws, chain = (i-1)*m + i))
+lapply(draws_per_dat, summarize_draws, default_convergence_measures())
+
 
