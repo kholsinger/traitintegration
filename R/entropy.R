@@ -60,11 +60,11 @@ entropy_omega <- function(r, k) {
 #' the vector of entropies supplied
 #'
 #' @export
-get_ent_R <- function(Omega, tol = 1.0e-14) {
+get_r_eff <- function(Omega, tol = 1.0e-14) {
   n_ent <- dim(Omega)[1]
   k <- dim(Omega)[2]
   ent_obs <- get_entropy(Omega)
-  ent_R <- numeric(n_ent)
+  r_eff <- numeric(n_ent)
   diff <- 1.0
   min_r <- 1.0e-16
   max_r <- 1 - min_r
@@ -85,8 +85,8 @@ get_ent_R <- function(Omega, tol = 1.0e-14) {
       }
       diff <- abs(f_mid_r - ent_obs[i])
     }
-    ent_R[i] <- mid
+    r_eff[i] <- mid
     diff <- 1.0
   }
-  return(ent_R)
+  return(r_eff)
 }

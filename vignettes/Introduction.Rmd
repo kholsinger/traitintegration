@@ -164,7 +164,7 @@ str(results)
 ```
 As you can see, `results` is a data frame in which the columns starting with 
 `EV_` are the eigenvalues of the correlation matrix, `Lead_EV` is the lead eigenvalue,
-`Var_EV` is the variance of the eigenvalues, and `ent_R` the entropy measure
+`Var_EV` is the variance of the eigenvalues, and $r_{eff}$ is the effective r measure
 of trait integration. The rows of the data frame correspond to samples from
 the posterior distribution.
 
@@ -184,12 +184,12 @@ summarize_statistics(results, probs = c(0.025, 0.05, 0.5, 0.95, 0.975), digits =
 
 You can also visualize the posterior distribution of any column using functions
 from the `bayesplot` package. For example, you can visualize the
-posterior distributions of the lead eigenvalue, variance of eigenvalues, and entR 
+posterior distributions of the lead eigenvalue, variance of eigenvalues, and $r_{eff}$ 
 as follows (and as before, you can leave off the `bayesplot::` and ``ggplot2::`
 prefixes if you've loaded those libraries):
 
 ```{r}
-bayesplot::mcmc_areas(results, pars = c("Lead_EV", "Var_EV", "ent_R"),
+bayesplot::mcmc_areas(results, pars = c("Lead_EV", "Var_EV", "r_eff"),
                       prob = 0.95) +
   ggplot2::labs(x = "Trait integration statistics")
 ```

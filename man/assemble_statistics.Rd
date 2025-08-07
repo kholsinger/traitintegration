@@ -11,7 +11,7 @@ assemble_statistics(fit)
 }
 \value{
 A data frame with the eigenvalues, lead eigenvalue, variance
-of eigenvalues, and ent_R statistic for each of the correlation matrices
+of eigenvalues, and r_eff statistic for each of the correlation matrices
 in the brmsfit object
 }
 \description{

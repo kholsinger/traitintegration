@@ -28,7 +28,7 @@
 #' @param fit A brmsfit object from a multiresponse model
 #'
 #' @return A data frame with the eigenvalues, lead eigenvalue, variance
-#' of eigenvalues, and ent_R statistic for each of the correlation matrices
+#' of eigenvalues, and r_eff statistic for each of the correlation matrices
 #' in the brmsfit object
 #'
 #' @examples
@@ -38,12 +38,12 @@
 assemble_statistics <- function(fit) {
   Omega <- get_Omega(fit)
   eigen_stats <- get_eigen(Omega)
-  ent_R <- get_ent_R(Omega)
-  df <- cbind(eigen_stats, ent_R)
+  r_eff <- get_r_eff(Omega)
+  df <- cbind(eigen_stats, r_eff)
   return(df)
 }
 
-#' Assemble eigenvalue and entR statistics from posterior samples
+#' Assemble eigenvalue and entR statistics from bootstrap samples
 #'
 #' @description
 #' This function encapsulates all of the computations associated with
@@ -55,13 +55,13 @@ assemble_statistics <- function(fit) {
 #' is the bootstrap sample for one element of the correlation matrix.
 #'
 #' @return A data frame with the eigenvalues, lead eigenvalue, variance
-#' of eigenvalues, and ent_R statistic for each of the correlation matrices
+#' of eigenvalues, and r_eff statistic for each of the correlation matrices
 #' in the bootstrap sample
 #'
 #' @export
 assemble_statistics_boot <- function(Omega) {
   eigen_stats <- get_eigen(Omega)
-  ent_R <- get_ent_R(Omega)
-  df <- cbind(eigen_stats, ent_R)
+  r_eff <- get_r_eff(Omega)
+  df <- cbind(eigen_stats, r_eff)
   return(df)
 }

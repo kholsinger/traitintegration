@@ -2,7 +2,7 @@
 % Please edit documentation in R/assemble_statistics.R
 \name{assemble_statistics_boot}
 \alias{assemble_statistics_boot}
-\title{Assemble eigenvalue and entR statistics from posterior samples}
+\title{Assemble eigenvalue and entR statistics from bootstrap samples}
 \usage{
 assemble_statistics_boot(Omega)
 }
@@ -12,7 +12,7 @@ is the bootstrap sample for one element of the correlation matrix.}
 }
 \value{
 A data frame with the eigenvalues, lead eigenvalue, variance
-of eigenvalues, and ent_R statistic for each of the correlation matrices
+of eigenvalues, and r_eff statistic for each of the correlation matrices
 in the bootstrap sample
 }
 \description{

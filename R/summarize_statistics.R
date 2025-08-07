@@ -22,7 +22,7 @@ summarize_statistics <- function(results, probs = c(0.025, 0.975),
                                  digits = 3)
 {
   na_vec <- rep(NA, 3)
-  dat <- data.frame(Statistic = c("Lead_EV", "Var_EV", "ent_R"),
+  dat <- data.frame(Statistic = c("Lead_EV", "Var_EV", "r_eff"),
                     Mean = na_vec)
 
   ## There is probably a better way to add named columns for the quantiles,
@@ -35,16 +35,16 @@ summarize_statistics <- function(results, probs = c(0.025, 0.975),
 
   Lead_EV_stats <- get_summary(results$Lead_EV, probs)
   Var_EV_stats <- get_summary(results$Var_EV, probs)
-  ent_R_stats <- get_summary(results$ent_R, probs)
+  r_eff_stats <- get_summary(results$r_eff, probs)
 
   dat$Mean[1] <- round(Lead_EV_stats$Mean, digits)
   dat$Mean[2] <- round(Var_EV_stats$Mean, digits)
-  dat$Mean[3] <- round(ent_R_stats$Mean, digits)
+  dat$Mean[3] <- round(r_eff_stats$Mean, digits)
 
   for (i in 1:length(probs)) {
     dat[1, i+2] <- round(Lead_EV_stats$quantile[i], digits)
     dat[2, i+2] <- round(Var_EV_stats$quantile[i], digits)
-    dat[3, i+2] <- round(ent_R_stats$quantile[i], digits)
+    dat[3, i+2] <- round(r_eff_stats$quantile[i], digits)
   }
   return(dat)
 }
