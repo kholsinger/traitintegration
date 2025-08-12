@@ -1,6 +1,8 @@
-This is a simple script to check that the brute force calculation of
+check-entropy.R is a simple script to check that the brute force calculation of
 entropy when a correlation matrix has all values equal to r on the off-diagonal
 matches the analytical calculation.
 
 IT DOES! The largest difference is 7.105427e-15 for r = 0.7 and k = 20.
 
+bootstrapping.R contains code that was used during development of the bootstrapping
+vignette.
